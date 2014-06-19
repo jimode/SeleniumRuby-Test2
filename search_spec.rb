@@ -1,9 +1,12 @@
 require 'selenium-webdriver'
+require_relative 'search'
 
 describe "Search" do
 
 	before(:each) do
 		@driver = Selenium::WebDriver.for :firefox
+		ENV['base_url'] = 'http://www.youtube.com'
+		@search = Search.new(@driver)
 	end
 
 	after(:each) do	
@@ -11,24 +14,23 @@ describe "Search" do
 	end
 
 	it "for a key word" do
-		@driver.get 'http://www.youtube.com'
-		@driver.find_element(:id, 'masthead-search-term').send_keys 'selenium'
-		@driver.find_element(:id, 'search-btn').submit
+		@search.with('selenium')
+		@search.search_results_present?
 		# expect(@driver.find_element(:css, "p.num-results").text).to eq("About 148,000 results")
-		expect(@driver.find_element(:css, "p.num-results").text).to include("results")
+		# expect(@driver.find_element(:css, "p.num-results").text).to include("results")
 		
 		# this seems to have been clicked before hand.
 		# @driver.find_element(:id, "appbar-guide-button").click
 
-		@driver.find_element(:link_text, "Movies").click
+		@search.best_of_youtube("Movies")
 
-		@driver.find_element(:xpath, "//div[@id='yt-masthead-signin']/button").click
+		# @driver.find_element(:xpath, "//div[@id='yt-masthead-signin']/button").click
 		
-		# Sign into Google account.
-		@driver.find_element(:id, "Email").send_keys "wrongemail@email.com"
-		@driver.find_element(:id, "Passwd").send_keys "wrong_password"
-		@driver.find_element(:id, "signIn").submit
-		expect(@driver.find_element(:id, "errormsg_0_Passwd").displayed?).to be_truthy
+		# # Sign into Google account.
+		@search.sign_in
+		@search.google_signin('wrongemail@email.com', 'wrong_password')	
+	
+		# expect(@driver.find_element(:id, "errormsg_0_Passwd").displayed?).to be_truthy
 	end
 	
 end
